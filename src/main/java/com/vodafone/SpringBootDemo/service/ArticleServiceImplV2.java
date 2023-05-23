@@ -2,6 +2,7 @@ package com.vodafone.SpringBootDemo.service;
 
 import com.vodafone.SpringBootDemo.contoller.ArticlesController;
 import com.vodafone.SpringBootDemo.contoller.AuthorController;
+import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
 import com.vodafone.SpringBootDemo.model.Article;
 import com.vodafone.SpringBootDemo.model.Links;
 import com.vodafone.SpringBootDemo.repository.ArticleRepository;
@@ -51,6 +52,8 @@ public class ArticleServiceImplV2 implements ArticleService{
 
     @Override
     public List<Article> getArticlesByAuthorName(String authorName, Integer page, Integer size) {
+        size = size!=null?size:10;
+        page = page!=null?page:0;
         Pageable pageable = PageRequest.of(page,size);
         Page<Article> articles = articleRepository.findByAuthor(authorName, pageable);
         for (Article article :
@@ -62,6 +65,9 @@ public class ArticleServiceImplV2 implements ArticleService{
 
     @Override
     public Article addArticle(Article article) {
+        if (articleRepository.findByName(article.getName()).isPresent()) {
+            throw new DuplicateEntryException("Article with that name already exists.");
+        }
         return addLinks(articleRepository.save(article));
     }
 

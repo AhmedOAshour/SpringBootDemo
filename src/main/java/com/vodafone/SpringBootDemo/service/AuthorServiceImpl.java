@@ -35,7 +35,7 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public List<Author> getAllAuthors() {
+    public List<Author> getAllAuthors(Integer page, Integer size) {
         return authors;
     }
 

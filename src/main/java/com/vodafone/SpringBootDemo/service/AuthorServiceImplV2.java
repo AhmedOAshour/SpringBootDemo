@@ -1,11 +1,14 @@
 package com.vodafone.SpringBootDemo.service;
 
 import com.vodafone.SpringBootDemo.contoller.AuthorController;
+import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
 import com.vodafone.SpringBootDemo.model.Author;
 import com.vodafone.SpringBootDemo.model.Links;
 import com.vodafone.SpringBootDemo.repository.AuthorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +36,10 @@ public class AuthorServiceImplV2 implements AuthorService{
     }
 
     @Override
-    public List<Author> getAllAuthors() {
+    public List<Author> getAllAuthors(Integer page, Integer size) {
+        page = page!=null?page:0;
+        size = size!=null?size:10;
+        Pageable pageable = PageRequest.of(page, size);
         List<Author> authors = authorRepository.findAll();
         for (Author author :
                 authors) {
@@ -44,6 +50,9 @@ public class AuthorServiceImplV2 implements AuthorService{
 
     @Override
     public Author addAuthor(Author author) {
+        if (authorRepository.findByName(author.getName()).isPresent()) {
+            throw new DuplicateEntryException("Author with that name already exists.");
+        }
         return addLinks(authorRepository.save(author));
     }
 

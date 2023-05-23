@@ -2,13 +2,13 @@ package com.vodafone.SpringBootDemo.errorhandlling;
 
 import org.springframework.http.HttpStatus;
 
-public class NotFoundException extends APIException{
-    public NotFoundException(String message) {
+public class DuplicateEntryException extends APIException{
+    public DuplicateEntryException(String message) {
         super(message);
     }
 
     @Override
     public HttpStatus getStatus() {
-        return HttpStatus.CONFLICT;
+        return HttpStatus.NOT_FOUND;
     }
 }

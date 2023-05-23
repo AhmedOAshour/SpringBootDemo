@@ -18,7 +18,7 @@ public class AuthorController {
 
     @GetMapping(value = "/authors", produces = {"application/json"})
     public ResponseEntity<List<Author>> getAuthors(){
-        return ResponseEntity.ok(authorService.getAllAuthors());
+        return ResponseEntity.ok(authorService.getAllAuthors(0, 0));
     }
 
     @GetMapping(value = "/authors/{id}", produces = {"application/json"})
