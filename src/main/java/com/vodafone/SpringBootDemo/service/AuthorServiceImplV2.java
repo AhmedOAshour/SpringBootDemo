@@ -1,5 +1,6 @@
 package com.vodafone.SpringBootDemo.service;
 
+import com.vodafone.SpringBootDemo.PageUtil;
 import com.vodafone.SpringBootDemo.contoller.AuthorController;
 import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
 import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
@@ -38,8 +39,7 @@ public class AuthorServiceImplV2 implements AuthorService{
 
     @Override
     public List<Author> getAllAuthors(Integer page, Integer size) {
-        page = page!=null?page:Integer.valueOf(0);
-        size = size!=null?size:Integer.valueOf(10);
+        PageUtil.defaultPageSize(page, size);
         Pageable pageable = PageRequest.of(page, size);
         List<Author> authors = authorRepository.findAll();
         for (Author author :
