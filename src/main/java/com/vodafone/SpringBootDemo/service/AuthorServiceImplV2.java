@@ -38,8 +38,8 @@ public class AuthorServiceImplV2 implements AuthorService{
 
     @Override
     public List<Author> getAllAuthors(Integer page, Integer size) {
-        page = page!=null?page:0;
-        size = size!=null?size:10;
+        page = page!=null?page:Integer.valueOf(0);
+        size = size!=null?size:Integer.valueOf(10);
         Pageable pageable = PageRequest.of(page, size);
         List<Author> authors = authorRepository.findAll();
         for (Author author :
@@ -59,7 +59,7 @@ public class AuthorServiceImplV2 implements AuthorService{
 
     @Override
     public Author updateAuthor(Integer id, Author author) {
-        if (authorRepository.findById(id).isPresent()) {
+        if (authorRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Author not found.");
         }
         author.setId(id);
@@ -68,7 +68,7 @@ public class AuthorServiceImplV2 implements AuthorService{
 
     @Override
     public void deleteAuthor(Integer id) {
-        if (authorRepository.findById(id).isPresent()) {
+        if (authorRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Author not found.");
         }
         authorRepository.deleteById(id);

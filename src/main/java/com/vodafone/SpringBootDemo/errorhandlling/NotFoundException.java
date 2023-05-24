@@ -9,6 +9,6 @@ public class NotFoundException extends APIException{
 
     @Override
     public HttpStatus getStatus() {
-        return HttpStatus.CONFLICT;
+        return HttpStatus.NOT_FOUND;
     }
 }

@@ -19,7 +19,7 @@ public class AuthorController {
 
     @GetMapping(value = "/authors", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Author>> getAuthors(){
-        return ResponseEntity.ok(authorService.getAllAuthors(0, 0));
+        return ResponseEntity.ok(authorService.getAllAuthors(Integer.valueOf(0), Integer.valueOf(10)));
     }
 
     @GetMapping(value = "/authors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

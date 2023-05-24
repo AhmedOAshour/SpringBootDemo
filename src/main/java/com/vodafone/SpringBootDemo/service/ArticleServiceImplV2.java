@@ -35,8 +35,8 @@ public class ArticleServiceImplV2 implements ArticleService{
 
     @Override
     public List<Article> getAllArticles(Integer page, Integer size) {
-        size = size!=null?size:10;
-        page = page!=null?page:0;
+        page = page!=null?page:Integer.valueOf(0);
+        size = size!=null?size:Integer.valueOf(10);
         Pageable pageable = PageRequest.of(page, size);
         Page<Article> articles = articleRepository.findAll(pageable);
         for (Article article :
@@ -53,8 +53,8 @@ public class ArticleServiceImplV2 implements ArticleService{
 
     @Override
     public List<Article> getArticlesByAuthorName(String authorName, Integer page, Integer size) {
-        size = size!=null?size:10;
-        page = page!=null?page:0;
+        page = page!=null?page:Integer.valueOf(0);
+        size = size!=null?size:Integer.valueOf(10);
         Pageable pageable = PageRequest.of(page,size);
         Page<Article> articles = articleRepository.findByAuthor(authorName, pageable);
         for (Article article :
@@ -74,7 +74,8 @@ public class ArticleServiceImplV2 implements ArticleService{
 
     @Override
     public void deleteArticle(Integer id) {
-        if (articleRepository.findById(id).isPresent()) {
+        if (articleRepository.findById(id).isEmpty()) {
+            System.out.println("Article not found");
             throw new NotFoundException("Article not found.");
         }
         articleRepository.deleteById(id);
@@ -82,7 +83,7 @@ public class ArticleServiceImplV2 implements ArticleService{
 
     @Override
     public Article updateArticle(Integer id, Article article) {
-        if (articleRepository.findById(id).isPresent()) {
+        if (articleRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Article not found.");
         }
         article.setId(id);

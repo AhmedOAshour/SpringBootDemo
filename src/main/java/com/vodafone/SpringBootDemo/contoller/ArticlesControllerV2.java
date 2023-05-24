@@ -22,9 +22,9 @@ public class ArticlesControllerV2 {
     public ResponseEntity<List<Article>> getArticles(@RequestParam(name = "author", required = false) String author) {
         List<Article> articles = new ArrayList<>();
         if (author != null) {
-            articles = articleService.getArticlesByAuthorName(author, 0, 0);
+//            articles = articleService.getArticlesByAuthorName(author, 0, 0);
         } else {
-            articles = articleService.getAllArticles(0,100);
+//            articles = articleService.getAllArticles(0,100);
         }
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }

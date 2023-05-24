@@ -9,6 +9,6 @@ public class DuplicateEntryException extends APIException{
 
     @Override
     public HttpStatus getStatus() {
-        return HttpStatus.NOT_FOUND;
+        return HttpStatus.CONFLICT;
     }
 }
