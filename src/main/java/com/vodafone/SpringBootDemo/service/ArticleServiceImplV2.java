@@ -3,6 +3,7 @@ package com.vodafone.SpringBootDemo.service;
 import com.vodafone.SpringBootDemo.contoller.ArticlesController;
 import com.vodafone.SpringBootDemo.contoller.AuthorController;
 import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
+import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
 import com.vodafone.SpringBootDemo.model.Article;
 import com.vodafone.SpringBootDemo.model.Links;
 import com.vodafone.SpringBootDemo.repository.ArticleRepository;
@@ -73,11 +74,17 @@ public class ArticleServiceImplV2 implements ArticleService{
 
     @Override
     public void deleteArticle(Integer id) {
+        if (articleRepository.findById(id).isPresent()) {
+            throw new NotFoundException("Article not found.");
+        }
         articleRepository.deleteById(id);
     }
 
     @Override
     public Article updateArticle(Integer id, Article article) {
+        if (articleRepository.findById(id).isPresent()) {
+            throw new NotFoundException("Article not found.");
+        }
         article.setId(id);
         return addLinks(articleRepository.save(article));
     }

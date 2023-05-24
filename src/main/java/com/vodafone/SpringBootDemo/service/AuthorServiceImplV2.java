@@ -2,6 +2,7 @@ package com.vodafone.SpringBootDemo.service;
 
 import com.vodafone.SpringBootDemo.contoller.AuthorController;
 import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
+import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
 import com.vodafone.SpringBootDemo.model.Author;
 import com.vodafone.SpringBootDemo.model.Links;
 import com.vodafone.SpringBootDemo.repository.AuthorRepository;
@@ -58,12 +59,18 @@ public class AuthorServiceImplV2 implements AuthorService{
 
     @Override
     public Author updateAuthor(Integer id, Author author) {
+        if (authorRepository.findById(id).isPresent()) {
+            throw new NotFoundException("Author not found.");
+        }
         author.setId(id);
         return addLinks(authorRepository.save(author));
     }
 
     @Override
     public void deleteAuthor(Integer id) {
+        if (authorRepository.findById(id).isPresent()) {
+            throw new NotFoundException("Author not found.");
+        }
         authorRepository.deleteById(id);
     }
 
