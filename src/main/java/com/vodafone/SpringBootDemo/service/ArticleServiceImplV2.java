@@ -1,7 +1,7 @@
 package com.vodafone.SpringBootDemo.service;
 
 import com.vodafone.SpringBootDemo.PageUtil;
-import com.vodafone.SpringBootDemo.contoller.ArticlesController;
+import com.vodafone.SpringBootDemo.contoller.ArticleController;
 import com.vodafone.SpringBootDemo.contoller.AuthorController;
 import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
 import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
@@ -36,14 +36,15 @@ public class ArticleServiceImplV2 implements ArticleService{
 
     @Override
     public List<Article> getAllArticles(Integer page, Integer size) {
-        PageUtil.defaultPageSize(page, size);
+        page = PageUtil.validPage(page);
+        size = PageUtil.validSize(size);
         Pageable pageable = PageRequest.of(page, size);
-        Page<Article> articles = articleRepository.findAll(pageable);
+        List<Article> articles = articleRepository.findAll(pageable).getContent();
         for (Article article :
                 articles) {
             addLinks(article);
         }
-        return articles.getContent();
+        return articles;
     }
 
     @Override
@@ -56,7 +57,8 @@ public class ArticleServiceImplV2 implements ArticleService{
 
     @Override
     public List<Article> getArticlesByAuthorName(String authorName, Integer page, Integer size) {
-        PageUtil.defaultPageSize(page, size);
+        page = PageUtil.validPage(page);
+        size = PageUtil.validSize(size);
         Pageable pageable = PageRequest.of(page,size);
         Page<Article> articles = articleRepository.findByAuthor(authorName, pageable);
         for (Article article :
@@ -71,6 +73,7 @@ public class ArticleServiceImplV2 implements ArticleService{
         if (articleRepository.findByName(article.getName()).isPresent()) {
             throw new DuplicateEntryException("Article with that name already exists.");
         }
+        articleRepository.save(article);
         return addLinks(articleRepository.save(article));
     }
 
@@ -97,7 +100,7 @@ public class ArticleServiceImplV2 implements ArticleService{
         List<Links> links = new ArrayList<>();
         Links self = new Links();
 
-        Link selfLink = linkTo(methodOn(ArticlesController.class)
+        Link selfLink = linkTo(methodOn(ArticleController.class)
                 .getArticle(article.getId())).withRel("self");
 
         self.setRel("self");

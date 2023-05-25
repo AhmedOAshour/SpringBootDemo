@@ -18,6 +18,21 @@ public class Article {
     @JsonProperty("_links")
     @Transient
     private List<Links> links;
+
+    public Article() {
+    }
+
+    public Article(String name, String author) {
+        this.name = name;
+        this.author = author;
+    }
+
+    public Article(Integer id, String name, String author) {
+        this.id = id;
+        this.name = name;
+        this.author = author;
+    }
+
     @Override
     public String toString() {
         return "Article [id=" + id + ", name=" + name + ", author=" + author + ", authorId=" + authorId + ", links="

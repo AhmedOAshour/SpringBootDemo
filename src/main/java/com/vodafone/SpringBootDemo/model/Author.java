@@ -16,7 +16,15 @@ public class Author {
     @JsonProperty("_links")
     @Transient
     private List<Links> links;
-    
+
+    public Author() {
+    }
+
+    public Author(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public Integer getId() {
         return id;
     }

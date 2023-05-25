@@ -7,6 +7,7 @@ import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
 import com.vodafone.SpringBootDemo.model.Author;
 import com.vodafone.SpringBootDemo.model.Links;
 import com.vodafone.SpringBootDemo.repository.AuthorRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.PageRequest;
@@ -14,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 
-import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,12 +34,16 @@ public class AuthorServiceImplV2 implements AuthorService{
 
     @Override
     public Author getAuthorById(Integer id) {
-        return authorRepository.findById(id).map(this::addLinks).orElse(null);
+            Author author = authorRepository.findById(id).map(this::addLinks).orElse(null);
+            if (author == null)
+                throw new NotFoundException("Author with this Id doesn't exist");
+            return author;
     }
 
     @Override
     public List<Author> getAllAuthors(Integer page, Integer size) {
-        PageUtil.defaultPageSize(page, size);
+        page = PageUtil.validPage(page);
+        size = PageUtil.validSize(size);;
         Pageable pageable = PageRequest.of(page, size);
         List<Author> authors = authorRepository.findAll();
         for (Author author :

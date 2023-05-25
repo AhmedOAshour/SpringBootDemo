@@ -1,12 +1,16 @@
 package com.vodafone.SpringBootDemo;
 
 public class PageUtil {
-    public static void defaultPageSize(Integer page, Integer size){
+    public static Integer validPage(Integer page){
         if (page==null || page<0){
-            page = Integer.valueOf(0);
+            return 0;
         }
+        return page;
+    }
+    public static Integer validSize(Integer size){
         if (size==null || size<1){
-            size = Integer.valueOf(10);
+            return 10;
         }
+        return size;
     }
 }

@@ -1,11 +1,10 @@
 package com.vodafone.SpringBootDemo.service;
 
-import com.vodafone.SpringBootDemo.contoller.ArticlesController;
+import com.vodafone.SpringBootDemo.contoller.ArticleController;
 import com.vodafone.SpringBootDemo.contoller.AuthorController;
 import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
 import com.vodafone.SpringBootDemo.model.Article;
 import com.vodafone.SpringBootDemo.model.Links;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 
@@ -87,7 +86,7 @@ public class ArticleServiceImpl implements ArticleService {
         List<Links> links = new ArrayList<>();
         Links self = new Links();
 
-        Link selfLink = linkTo(methodOn(ArticlesController.class)
+        Link selfLink = linkTo(methodOn(ArticleController.class)
                 .getArticle(article.getId())).withRel("self");
 
         self.setRel("self");
