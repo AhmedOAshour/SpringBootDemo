@@ -1,14 +1,15 @@
 package com.vodafone.SpringBootDemo.service;
 
-import com.vodafone.SpringBootDemo.PageUtil;
+import com.vodafone.SpringBootDemo.util.ArticleFactory;
+import com.vodafone.SpringBootDemo.util.PageUtil;
 import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
 import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
 import com.vodafone.SpringBootDemo.model.Article;
 import com.vodafone.SpringBootDemo.repository.ArticleRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -26,23 +27,30 @@ import static org.mockito.Mockito.when;
 //@ActiveProfiles("test")
 @SpringBootTest
 public class ArticleServiceImplV2Test {
-    private ArticleService articleService;
+
+    /*
+        Either InjectMocks on class (not interface)
+
+        or BeforeEach/All setup
+     */
+    @InjectMocks
+    private ArticleServiceImplV2 articleService;
 
     @Mock
     private ArticleRepository articleRepository;
 
-    @BeforeEach
-    public void setUp(){
-        articleService = new ArticleServiceImplV2(articleRepository);
-    }
+//    @BeforeEach
+//    public void setUp(){
+//        articleService = new ArticleServiceImplV2(articleRepository);
+//    }
 
     @Test
     public void getAllArticlesTest_SendValidPageSize_ReturnArticleList() {
         // Arrange
         Integer page = Integer.valueOf(0);
         Integer size = Integer.valueOf(10);
-        // Act
         when(articleRepository.findAll(PageRequest.of(page,size))).thenReturn(Page.empty());
+        // Act
         List<Article> result = articleService.getAllArticles(page, size);
         // Assert
         // TODO: assert what?
@@ -117,18 +125,20 @@ public class ArticleServiceImplV2Test {
     @Test
     public void addArticleTest_SendNewArticle_ReturnArticle() {
         // Arrange
-        Article article = new Article("book", "ahmed");
+        Article article = ArticleFactory.createArticle("book", "ahmed", 1);
+        when(articleRepository.save(article)).thenReturn(ArticleFactory.createArticle(1, "book", "ahmed", 1));
         // Act
-        when(articleRepository.save(article)).thenReturn(new Article(1, "book", "ahmed"));
         Article result = articleService.addArticle(article);
+        article.setId(1);
         // Assert
-        assertTrue(result != null);
+        assertEquals(article, result);
     }
 
     @Test
     public void addArticleTest_SendDuplicateArticle_ReturnDuplicateEntryException() {
         // Arrange
-        Article article = new Article("book", "ahmed");
+        Article article = ArticleFactory.createArticle("book", "ahmed", 1);
+
         // Act
         when(articleRepository.findByName(article.getName())).thenReturn(Optional.of(article));
         // Assert
@@ -160,10 +170,12 @@ public class ArticleServiceImplV2Test {
     public void updateArticleTest_SendValidId_Return() {
         // Arrange
         Integer id = Integer.valueOf(1);
-        Article article = new Article("","");
+        Article article = ArticleFactory.createArticle("Ahmed", "Ahmed", 1);
         // Act
-        when(articleRepository.findById(id)).thenReturn(Optional.of(new Article(1,"","")));
-        when(articleRepository.save(article)).thenReturn(new Article(1,"",""));
+        when(articleRepository.findById(id)).thenReturn(Optional.of(
+                ArticleFactory.createArticle(id, "", "", 1)));
+        when(articleRepository.save(article)).thenReturn(
+                ArticleFactory.createArticle(id, article.getName(), article.getAuthor(), article.getAuthorId()));
         // Assert
         assertDoesNotThrow(()->{articleService.updateArticle(id, article);});
     }
@@ -172,7 +184,7 @@ public class ArticleServiceImplV2Test {
     public void updateArticleTest_SendInvalidId_ThrowNotFoundException() {
         // Arrange
         Integer id = 1;
-        Article article = new Article(1, "book","ahmed");
+        Article article = ArticleFactory.createArticle("book", "name", 1);
         // Act
         when(articleRepository.findById(id)).thenReturn(Optional.empty());
         // Assert

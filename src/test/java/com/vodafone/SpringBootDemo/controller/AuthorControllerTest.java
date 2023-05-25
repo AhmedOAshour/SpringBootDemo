@@ -1,30 +1,23 @@
 package com.vodafone.SpringBootDemo.controller;
 
-import com.vodafone.SpringBootDemo.PageUtil;
 import com.vodafone.SpringBootDemo.contoller.AuthorController;
 import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
 import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
 import com.vodafone.SpringBootDemo.model.Author;
-import com.vodafone.SpringBootDemo.model.Author;
-import com.vodafone.SpringBootDemo.repository.AuthorRepository;
 import com.vodafone.SpringBootDemo.service.AuthorService;
-import com.vodafone.SpringBootDemo.service.AuthorService;
-import com.vodafone.SpringBootDemo.service.AuthorServiceImplV2;
-import org.junit.jupiter.api.Assertions;
+import com.vodafone.SpringBootDemo.util.AuthorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -62,7 +55,7 @@ public class AuthorControllerTest {
         // Arrange
         Integer id = 1;
         // Act
-        when(authorService.getAuthorById(id)).thenReturn(new Author(1, ""));
+        when(authorService.getAuthorById(id)).thenReturn(AuthorFactory.createAuthor(id, "ahmed"));
         ResponseEntity<Author> result = authorController.getAuthorById(id);
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());

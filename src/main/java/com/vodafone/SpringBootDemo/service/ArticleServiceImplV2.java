@@ -1,6 +1,6 @@
 package com.vodafone.SpringBootDemo.service;
 
-import com.vodafone.SpringBootDemo.PageUtil;
+import com.vodafone.SpringBootDemo.util.PageUtil;
 import com.vodafone.SpringBootDemo.contoller.ArticleController;
 import com.vodafone.SpringBootDemo.contoller.AuthorController;
 import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;

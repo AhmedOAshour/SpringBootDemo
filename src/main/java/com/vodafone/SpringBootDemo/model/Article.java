@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name="Article")
@@ -18,20 +19,6 @@ public class Article {
     @JsonProperty("_links")
     @Transient
     private List<Links> links;
-
-    public Article() {
-    }
-
-    public Article(String name, String author) {
-        this.name = name;
-        this.author = author;
-    }
-
-    public Article(Integer id, String name, String author) {
-        this.id = id;
-        this.name = name;
-        this.author = author;
-    }
 
     @Override
     public String toString() {
@@ -78,5 +65,17 @@ public class Article {
     public void setAuthorId(Integer authorId) {
         this.authorId = authorId;
     }
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Article article = (Article) o;
+        return authorId == article.authorId && Objects.equals(id, article.id) && Objects.equals(name, article.name) && Objects.equals(author, article.author);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, author, authorId);
+    }
 }

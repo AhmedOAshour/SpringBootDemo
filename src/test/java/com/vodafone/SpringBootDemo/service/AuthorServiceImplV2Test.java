@@ -1,11 +1,10 @@
 package com.vodafone.SpringBootDemo.service;
 
-import com.vodafone.SpringBootDemo.PageUtil;
+import com.vodafone.SpringBootDemo.util.PageUtil;
 import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
 import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
 import com.vodafone.SpringBootDemo.model.Author;
 import com.vodafone.SpringBootDemo.repository.AuthorRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

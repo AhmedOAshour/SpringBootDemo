@@ -1,4 +1,4 @@
-package com.vodafone.SpringBootDemo;
+package com.vodafone.SpringBootDemo.util;
 
 public class PageUtil {
     public static Integer validPage(Integer page){
