@@ -1,5 +1,6 @@
 package com.vodafone.SpringBootDemo.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vodafone.SpringBootDemo.contoller.ArticleController;
 import com.vodafone.SpringBootDemo.errorhandlling.DuplicateEntryException;
 import com.vodafone.SpringBootDemo.errorhandlling.NotFoundException;
@@ -11,148 +12,191 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @ExtendWith(SpringExtension.class)
 //@ActiveProfiles("test")
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 public class ArticleControllerTest {
-    private ArticleController articleController;
 
-    @Mock
+    @MockBean
     private ArticleService articleService;
 
-    @BeforeEach
-    public void setUp(){
-        articleController = new ArticleController(articleService);
+    @Autowired
+    private MockMvc mockMvc;
+
+    private String asJsonString(Object object) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(object);
     }
 
     @Test
-    public void getArticlesTest_SendAuthorName_ReturnResponseEntityArticleList() {
+    public void getArticlesTest_SendPageSize_ReturnArticleListOk() throws Exception {
+        // Arrange
+        Integer page = 0;
+        Integer size = 1;
+        List<Article> articles = new ArrayList<>();
+        articles.add(ArticleFactory.createArticle(1, "ahmed", "ahmed", 1));
+        articles.add(ArticleFactory.createArticle(2, "mohamed", "ahmed", 1));
+        articles.add(ArticleFactory.createArticle(3, "saad", "ahmed", 1));
+        when(articleService.getAllArticles( page, size)).thenReturn(articles);
+        // Act
+        // Assert
+
+        mockMvc.perform(get(String.format("/v1/articles?page=%d&size=%d", page, size))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3));
+    }
+
+    @Test
+    public void getArticlesTest_SendAuthorName_ReturnArticleListOk() throws Exception {
         // Arrange
         String authorName = "ahmed";
         List<Article> articles = new ArrayList<>();
         articles.add(ArticleFactory.createArticle(1, "ahmed", "ahmed", 1));
         articles.add(ArticleFactory.createArticle(2, "mohamed", "ahmed", 1));
         articles.add(ArticleFactory.createArticle(3, "saad", "ahmed", 1));
-        when(articleService.getArticlesByAuthorName(authorName, null, null)).thenReturn(articles);
+        when(articleService.getArticlesByAuthorName("ahmed", null, null)).thenReturn(articles);
         // Act
-        ResponseEntity<List<Article>> result = articleController.getArticles(authorName, null, null);
         // Assert
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(3, result.getBody().size());
-        assertEquals(articles.get(0), result.getBody().get(0));
-        assertEquals(articles.get(1), result.getBody().get(1));
-        assertEquals(articles.get(2), result.getBody().get(2));
+
+        mockMvc.perform(get("/v1/articles?author=" + authorName)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3));
     }
 
     @Test
-    public void getArticleTest_SendId_ReturnResponseEntityArticle() {
+    public void getArticleTest_SendId_ReturnArticleOk() throws Exception {
         // Arrange
-        Article article = ArticleFactory.createArticle(1, "ahmed", "ahmed", 1);
+        Integer id = 1;
+        Article article = ArticleFactory.createArticle(id, "ahmed", "ahmed", 1);
         when(articleService.getArticleById(article.getId())).thenReturn(article);
         // Act
-        ResponseEntity<Article> result = articleController.getArticle(article.getId());
         // Assert
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(article, result.getBody());
+        mockMvc.perform(get("/v1/articles/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id));
     }
 
     @Test
-    public void getArticleTest_SendInvalidId_ThrowNotFoundException() {
+    public void getArticleTest_SendInvalidId_ThrowNotFoundException() throws Exception {
         // Arrange
         Integer id = 1;
         when(articleService.getArticleById(1)).thenThrow(NotFoundException.class);
         // Act
         // Assert
-        assertThrows(NotFoundException.class, ()->{articleController.getArticle(id);});
-        // TODO: check for response here or create test for exception handler?
-        // assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        mockMvc.perform(get("/v1/articles/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"));
     }
 
     @Test
-    public void addArticleTest_SendNewArticle_ReturnResponseEntityArticle() {
+    public void addArticleTest_SendNewArticle_ReturnResponseEntityArticle() throws Exception {
         // Arrange
         Article article = ArticleFactory.createArticle("Ahmed", "Ahmed", 0);
         when(articleService.addArticle(article)).thenReturn(article);
         // Act
-        ResponseEntity<Article> result = articleController.addArticle(article);
-        article.setId(result.getBody().getId());
         // Assert
-        assertEquals(HttpStatus.CREATED, result.getStatusCode());
-        assertEquals(article, result.getBody());
-//         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        mockMvc.perform(post("/v1/articles")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(article)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value(article.getName()));
     }
 
     @Test
-    public void addArticleTest_SendDuplicateArticle_ThrowDuplicateEntryException() {
+    public void addArticleTest_SendDuplicateArticle_ThrowDuplicateEntryException() throws Exception {
         // Arrange
         Article article = ArticleFactory.createArticle("", "", 1);
         when(articleService.addArticle(article)).thenThrow(DuplicateEntryException.class);
         // Act
         // Assert
-        assertThrows(DuplicateEntryException.class, ()->{articleController.addArticle(article);});
-//         assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
+        mockMvc.perform(post("/v1/articles")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(article)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("Conflict"));
     }
 
     @Test
-    public void updateArticleTest_SendValidId_ReturnResponseEntityArticle() {
+    public void updateArticleTest_SendValidId_ReturnResponseEntityArticle() throws Exception {
         // Arrange
         Article article = ArticleFactory.createArticle("Ahmed", "Ahmed", 1);
         Integer id = 1;
         when(articleService.updateArticle(id, article)).thenReturn(
                 ArticleFactory.createArticle(id, article.getName(), article.getAuthor(), article.getAuthorId()));
         // Act
-        ResponseEntity<Article> result = articleController.updateArticle(id, article);
-        article.setId(id);
         // Assert
-         assertEquals(HttpStatus.OK, result.getStatusCode());
-         assertEquals(article, result.getBody());
+        mockMvc.perform(put("/v1/articles/"+id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(article)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.name").value(article.getName()));
     }
 
     @Test
-    public void updateArticleTest_SendInvalidId_ThrowNotFoundException() {
+    public void updateArticleTest_SendInvalidId_ThrowNotFoundException() throws Exception {
         // Arrange
         Article article = ArticleFactory.createArticle("","",1);
         Integer id = 1;
         when(articleService.updateArticle(id, article)).thenThrow(NotFoundException.class);
         // Act
         // Assert
-        assertThrows(NotFoundException.class, ()->{articleController.updateArticle(id, article);});
-//         assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
+        mockMvc.perform(put("/v1/articles/"+id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(article)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"));
     }
 
     @Test
-    public void deleteArticleTest_SendValidId_ReturnResponseEntity() {
+    public void deleteArticleTest_SendValidId_ReturnResponseEntity() throws Exception {
         // Arrange
         Integer id = 1;
         doNothing().when(articleService).deleteArticle(id);
         // Act
-        ResponseEntity<Article> result = articleController.deleteArticle(id);
         // Assert
-         assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
-         assertNull(result.getBody());
+        mockMvc.perform(delete("/v1/articles/"+id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
     }
 
     @Test
-    public void deleteArticleTest_SendInvalidId_ThrowNotFoundException() {
+    public void deleteArticleTest_SendInvalidId_ThrowNotFoundException() throws Exception {
         // Arrange
         Integer id = 1;
         doThrow(NotFoundException.class).when(articleService).deleteArticle(id);
         // Act
         // Assert
-        assertThrows(NotFoundException.class, ()->{articleController.deleteArticle(id);});
-//         assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
+        mockMvc.perform(delete("/v1/articles/"+id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"));
     }
 
 }
